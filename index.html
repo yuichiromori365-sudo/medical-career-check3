@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3b66" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>医療職適性診断</title>
+  <style>
+    :root{
+      --navy:#0b3b66;
+      --blue:#2f80ed;
+      --sky:#56ccf2;
+      --mint:#27ae60;
+      --bg:#eef7fb;
+      --card:#ffffff;
+      --text:#16324a;
+      --sub:#607589;
+      --line:#dbe8ef;
+      --gold:#f2c94c;
+      --shadow:0 18px 50px rgba(23,67,96,.16);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif}
+    body{
+      color:var(--text);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(86,204,242,.22), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(39,174,96,.14), transparent 28%),
+        linear-gradient(160deg,#eef8fc,#f8fbfd 55%,#edf7f4);
+      padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .app{
+      width:min(100%,620px);
+      margin:0 auto;
+      min-height:100svh;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:26px;
+      background:linear-gradient(135deg,#0b3b66 0%,#1769aa 54%,#1aa6b7 100%);
+      color:#fff;
+      padding:22px 18px;
+      box-shadow:var(--shadow);
+    }
+    .hero:before,.hero:after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.16);
+    }
+    .hero:before{width:170px;height:170px;right:-70px;top:-70px}
+    .hero:after{width:110px;height:110px;right:12px;bottom:-62px}
+    .medical-icon{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      padding:7px 11px;border-radius:999px;
+      font-size:13px;font-weight:800;
+      backdrop-filter:blur(8px);
+    }
+    .cross{
+      width:20px;height:20px;position:relative;display:inline-block
+    }
+    .cross:before,.cross:after{
+      content:"";position:absolute;background:#fff;border-radius:3px
+    }
+    .cross:before{width:7px;height:20px;left:6.5px;top:0}
+    .cross:after{width:20px;height:7px;left:0;top:6.5px}
+    h1{margin:14px 0 7px;font-size:clamp(30px,8vw,45px);line-height:1.12}
+    .hero p{margin:0;color:rgba(255,255,255,.86);line-height:1.75;font-size:14px}
+
+    .panel{
+      background:rgba(255,255,255,.97);
+      border:1px solid rgba(255,255,255,.85);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .progressRow{
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:13px;color:var(--sub);margin-bottom:9px
+    }
+    .track{height:10px;background:#e8f0f4;border-radius:999px;overflow:hidden}
+    .bar{height:100%;width:20%;background:linear-gradient(90deg,var(--blue),var(--sky),#31c48d);transition:width .32s ease}
+    .question{font-size:clamp(23px,6vw,31px);line-height:1.35;margin:22px 0 16px}
+    .choices{display:grid;gap:11px}
+    .choice{
+      appearance:none;width:100%;min-height:60px;
+      border:1px solid var(--line);border-radius:17px;background:#fff;color:var(--text);
+      font-size:16px;font-weight:800;text-align:left;padding:14px 16px;
+      box-shadow:0 5px 14px rgba(29,69,91,.06);cursor:pointer;
+      transition:.16s ease;
+    }
+    .choice:active{transform:scale(.985);background:#edf8ff;border-color:#8dcfff}
+    .note{font-size:12px;color:#80909d;line-height:1.65;margin:14px 2px 0}
+
+    .hidden{display:none!important}
+    .resultCard{
+      position:relative;
+      overflow:hidden;
+      text-align:center;
+      background:linear-gradient(155deg,#ffffff,#f3fbff 58%,#eefbf7);
+      border:2px solid #b9e4f5;
+      border-radius:26px;
+      padding:22px 18px;
+      box-shadow:var(--shadow);
+    }
+    .resultCard:before{
+      content:"";position:absolute;width:210px;height:210px;border-radius:50%;
+      background:rgba(86,204,242,.1);right:-100px;top:-115px
+    }
+    .crown{font-size:40px;line-height:1;margin-bottom:7px}
+    .resultLabel{font-size:14px;color:#5e7385;font-weight:800}
+    .mainType{
+      margin:8px 0 4px;
+      font-size:clamp(27px,7vw,39px);
+      line-height:1.25;color:var(--navy);font-weight:950
+    }
+    .mainDesc{color:var(--sub);line-height:1.75;margin:10px auto 0;max-width:520px;font-size:14px}
+    .shareTag{
+      display:inline-block;margin-top:13px;padding:7px 11px;
+      border-radius:999px;background:#e8f6ff;color:#1668a6;font-size:12px;font-weight:900
+    }
+
+    .chartWrap{margin-top:14px;padding:15px 10px 4px}
+    canvas{width:100%;max-width:380px;height:auto;display:block;margin:0 auto}
+    .chartTitle{font-size:18px;margin:2px 0 0}
+    .chartSub{font-size:12px;color:var(--sub);margin:5px 0 0}
+
+    .ranking{display:grid;gap:11px;margin-top:16px;text-align:left}
+    .rank{
+      border:1px solid var(--line);border-radius:17px;padding:15px;background:#fff
+    }
+    .rankTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .jobName{font-size:19px;font-weight:900}
+    .rankNo{font-size:12px;font-weight:900;color:#0b6c84;background:#e9f9fd;padding:5px 9px;border-radius:999px}
+    .rank p{color:var(--sub);font-size:13px;line-height:1.65;margin:8px 0 0}
+    .meter{height:8px;background:#e8eff3;border-radius:999px;overflow:hidden;margin-top:10px}
+    .meter span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#31c48d)}
+
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+    .btn{
+      border:0;border-radius:15px;min-height:52px;font-size:15px;font-weight:900;cursor:pointer
+    }
+    .primary{color:#fff;background:linear-gradient(90deg,#1261a0,#15a0b5)}
+    .secondary{color:var(--text);background:#eaf2f6}
+    .tiktokTip{
+      margin-top:14px;background:#101820;color:#fff;border-radius:16px;padding:13px;text-align:left
+    }
+    .tiktokTip strong{display:block;margin-bottom:5px}
+    .tiktokTip p{margin:0;color:#d6e0e7;font-size:12px;line-height:1.65}
+
+    #confetti{
+      position:fixed;inset:0;pointer-events:none;z-index:99;
+      width:100%;height:100%
+    }
+    .footer{text-align:center;color:#8393a1;font-size:11px;padding:2px 0 8px}
+
+    @media(max-width:390px){
+      .app{padding:10px}
+      .hero,.panel,.resultCard{border-radius:21px}
+      .hero{padding:19px 15px}
+      .panel{padding:15px}
+      .choice{font-size:15px;min-height:56px}
+      .actions{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<main class="app">
+  <section class="hero">
+    <span class="medical-icon"><span class="cross"></span>高校生向け・5問診断</span>
+    <h1>医療職適性診断</h1>
+    <p>好きな教科、興味、働き方から、あなたに合いそうな医療職を診断します。</p>
+  </section>
+
+  <section class="panel" id="quizPanel">
+    <div class="progressRow">
+      <span id="stepLabel">質問 1 / 5</span>
+      <span id="percentLabel">20%</span>
+    </div>
+    <div class="track"><div class="bar" id="progressBar"></div></div>
+    <h2 class="question" id="questionText"></h2>
+    <div class="choices" id="choices"></div>
+    <p class="note">※進路選択のきっかけを作る簡易診断です。職業の適性を断定するものではありません。</p>
+  </section>
+
+  <section class="hidden" id="resultSection">
+    <div class="resultCard" id="captureCard">
+      <div class="crown">🏆</div>
+      <div class="resultLabel">あなたに最も向いているのは</div>
+      <div class="mainType" id="mainType"></div>
+      <p class="mainDesc" id="mainDesc"></p>
+      <div class="shareTag">#医療職適性診断</div>
+
+      <div class="chartWrap">
+        <h3 class="chartTitle">あなたの適性バランス</h3>
+        <p class="chartSub">5つの力をレーダーチャートで表示</p>
+        <canvas id="radar" width="760" height="620"></canvas>
+      </div>
+
+      <div class="ranking" id="ranking"></div>
+
+      <div class="tiktokTip">
+        <strong>📤 TikTok投稿例</strong>
+        <p>「5問で医療職適性診断してみた！私は〇〇タイプでした。みんなは何タイプ？」</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="copyResult()">結果をコピー</button>
+        <button class="btn secondary" onclick="restart()">もう一度診断</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">Medical Career Fit Checker</div>
+</main>
+
+<script>
+const jobs = {
+  doctor:{name:"医師タイプ！", short:"医師", desc:"幅広い理系知識を使い、診断と治療の中心を担いたい人に向いています。"},
+  radiologic:{name:"診療放射線技師タイプ！", short:"診療放射線技師", desc:"物理・数学、医療画像、機械操作が好きで、患者さんにも丁寧に関われる人に向いています。"},
+  pharmacist:{name:"薬剤師タイプ！", short:"薬剤師", desc:"化学や薬の作用に興味があり、正確さと説明力を活かしたい人に向いています。"},
+  engineer:{name:"臨床工学技士タイプ！", short:"臨床工学技士", desc:"工学・電気・機械が好きで、医療機器を通じて患者さんを支えたい人に向いています。"},
+  lab:{name:"臨床検査技師タイプ！", short:"臨床検査技師", desc:"生物、観察、分析が好きで、検査データから診療を支えたい人に向いています。"},
+  nurse:{name:"看護師タイプ！", short:"看護師", desc:"患者さんに近い場所で継続的に支え、チーム医療に貢献したい人に向いています。"},
+  pt:{name:"理学療法士タイプ！", short:"理学療法士", desc:"身体の動きや回復に興味があり、人と長く関わりたい人に向いています。"},
+  ot:{name:"作業療法士タイプ！", short:"作業療法士", desc:"生活動作や社会復帰、その人らしい暮らしを支えたい人に向いています。"},
+  st:{name:"言語聴覚士タイプ！", short:"言語聴覚士", desc:"ことば、聞こえ、飲み込みの支援に興味がある人に向いています。"}
+};
+
+const traits = ["科学力","機械力","分析力","対人力","支援力"];
+
+const questions = [
+  {
+    q:"一番好きな理系分野は？",
+    answers:[
+      ["理系科目全体",{jobs:{doctor:5,nurse:1,lab:1},traits:[5,2,4,2,2]}],
+      ["物理・数学",{jobs:{radiologic:5,engineer:4,doctor:1},traits:[5,5,3,1,1]}],
+      ["化学",{jobs:{pharmacist:5,lab:2,doctor:1},traits:[5,2,4,1,1]}],
+      ["生物",{jobs:{lab:5,nurse:3,pt:3,ot:3,st:3},traits:[4,1,4,3,4]}],
+      ["工学・機械・電気",{jobs:{engineer:5,radiologic:4},traits:[4,5,3,1,2]}]
+    ]
+  },
+  {
+    q:"どんな作業にワクワクする？",
+    answers:[
+      ["機械や装置を操作する",{jobs:{radiologic:5,engineer:5},traits:[3,5,3,1,2]}],
+      ["細かく観察・分析する",{jobs:{lab:5,pharmacist:3},traits:[4,1,5,1,2]}],
+      ["薬や化学物質を扱う",{jobs:{pharmacist:5,lab:1},traits:[5,1,4,1,2]}],
+      ["診断や治療方針を考える",{jobs:{doctor:5,nurse:2},traits:[5,2,4,3,2]}],
+      ["人の回復を支える",{jobs:{pt:4,ot:4,st:4,nurse:3},traits:[2,1,2,4,5]}]
+    ]
+  },
+  {
+    q:"患者さんとの関わり方は？",
+    answers:[
+      ["長く深く関わりたい",{jobs:{nurse:5,pt:5,ot:5,st:5},traits:[1,1,2,5,5]}],
+      ["短時間でも丁寧に関わりたい",{jobs:{radiologic:5,pharmacist:4},traits:[2,2,3,4,3]}],
+      ["裏方として支えたい",{jobs:{lab:5,engineer:4,pharmacist:2},traits:[3,4,5,1,3]}],
+      ["チームの中心で判断したい",{jobs:{doctor:5,nurse:3},traits:[4,2,4,4,3]}],
+      ["機械を通して支えたい",{jobs:{engineer:5,radiologic:4},traits:[3,5,3,2,3]}]
+    ]
+  },
+  {
+    q:"一番興味があるテーマは？",
+    answers:[
+      ["骨・臓器・医療画像",{jobs:{radiologic:6,doctor:1},traits:[4,5,4,2,2]}],
+      ["血液・細胞・微生物",{jobs:{lab:6,doctor:1},traits:[5,1,5,1,2]}],
+      ["薬の作用や安全性",{jobs:{pharmacist:6},traits:[5,1,4,2,2]}],
+      ["人工呼吸器・透析・医療機器",{jobs:{engineer:6},traits:[4,5,4,2,3]}],
+      ["運動・生活・ことばの回復",{jobs:{pt:4,ot:4,st:4},traits:[2,1,2,4,5]}]
+    ]
+  },
+  {
+    q:"将来、どんな専門家になりたい？",
+    answers:[
+      ["診断と治療の責任者",{jobs:{doctor:6},traits:[5,2,4,4,3]}],
+      ["画像診断を支える専門家",{jobs:{radiologic:6},traits:[4,5,4,3,3]}],
+      ["薬の専門家",{jobs:{pharmacist:6},traits:[5,1,5,3,3]}],
+      ["検査・分析の専門家",{jobs:{lab:6},traits:[4,2,5,2,3]}],
+      ["医療機器の専門家",{jobs:{engineer:6},traits:[4,5,4,2,3]}],
+      ["生活や回復を支える専門家",{jobs:{nurse:4,pt:4,ot:4,st:4},traits:[2,1,2,5,5]}]
+    ]
+  }
+];
+
+let index = 0;
+let jobScores = {};
+let traitScores = [0,0,0,0,0];
+Object.keys(jobs).forEach(k=>jobScores[k]=0);
+
+function renderQuestion(){
+  const item = questions[index];
+  document.getElementById("questionText").textContent = item.q;
+  const choices = document.getElementById("choices");
+  choices.innerHTML = "";
+  item.answers.forEach(([label,data])=>{
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.textContent = label;
+    btn.onclick = ()=>choose(data);
+    choices.appendChild(btn);
+  });
+  const pct = Math.round((index+1)/questions.length*100);
+  document.getElementById("stepLabel").textContent = `質問 ${index+1} / ${questions.length}`;
+  document.getElementById("percentLabel").textContent = `${pct}%`;
+  document.getElementById("progressBar").style.width = `${pct}%`;
+}
+
+function choose(data){
+  Object.entries(data.jobs).forEach(([k,v])=>jobScores[k]+=v);
+  data.traits.forEach((v,i)=>traitScores[i]+=v);
+  index++;
+  if(index < questions.length) renderQuestion();
+  else showResult();
+}
+
+function showResult(){
+  document.getElementById("quizPanel").classList.add("hidden");
+  document.getElementById("resultSection").classList.remove("hidden");
+
+  const top = Object.entries(jobScores).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  window.topResults = top.map(([k])=>jobs[k].short);
+
+  const winner = jobs[top[0][0]];
+  document.getElementById("mainType").textContent = `あなたは${winner.name}`;
+  document.getElementById("mainDesc").textContent = winner.desc;
+
+  const maxScore = top[0][1] || 1;
+  const ranking = document.getElementById("ranking");
+  ranking.innerHTML = "";
+  top.forEach(([key,score],i)=>{
+    const box = document.createElement("div");
+    box.className = "rank";
+    const width = Math.max(35, Math.round(score/maxScore*100));
+    box.innerHTML = `
+      <div class="rankTop">
+        <div class="jobName">${jobs[key].short}</div>
+        <div class="rankNo">${i+1}位</div>
+      </div>
+      <p>${jobs[key].desc}</p>
+      <div class="meter"><span style="width:${width}%"></span></div>
+    `;
+    ranking.appendChild(box);
+  });
+
+  drawRadar();
+  launchConfetti();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function drawRadar(){
+  const canvas = document.getElementById("radar");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const cx = W/2, cy = H/2 + 10;
+  const radius = Math.min(W,H)*0.34;
+  const levels = 5;
+  const maxTrait = 25;
+  const values = traitScores.map(v=>Math.min(100,Math.round(v/maxTrait*100)));
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#dce8ef";
+  for(let l=1;l<=levels;l++){
+    const r = radius*l/levels;
+    ctx.beginPath();
+    for(let i=0;i<traits.length;i++){
+      const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+      const x = cx + Math.cos(a)*r;
+      const y = cy + Math.sin(a)*r;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  for(let i=0;i<traits.length;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*radius,cy+Math.sin(a)*radius);
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+    const r = radius*(v/100);
+    const x = cx+Math.cos(a)*r;
+    const y = cy+Math.sin(a)*r;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0,"rgba(47,128,237,.38)");
+  grad.addColorStop(1,"rgba(39,174,96,.35)");
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = "#1769aa";
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  ctx.fillStyle = "#0b3b66";
+  values.forEach((v,i)=>{
+    const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+    const r = radius*(v/100);
+    const x = cx+Math.cos(a)*r;
+    const y = cy+Math.sin(a)*r;
+    ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);ctx.fill();
+  });
+
+  ctx.font = "700 28px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "#16324a";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  traits.forEach((label,i)=>{
+    const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+    const rr = radius+52;
+    const x = cx+Math.cos(a)*rr;
+    const y = cy+Math.sin(a)*rr;
+    ctx.fillText(label,x,y);
+  });
+
+  ctx.font = "800 23px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillStyle = "#1769aa";
+  values.forEach((v,i)=>{
+    const a = -Math.PI/2 + i*2*Math.PI/traits.length;
+    const rr = radius+86;
+    const x = cx+Math.cos(a)*rr;
+    const y = cy+Math.sin(a)*rr;
+    ctx.fillText(v,x,y);
+  });
+}
+
+async function copyResult(){
+  const text =
+`医療職適性診断の結果
+🏆 ${topResults[0]}タイプ！
+2位：${topResults[1]}
+3位：${topResults[2]}
+#医療職適性診断 #医療職 #進路選び`;
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("TikTok用の結果文をコピーしました！");
+  }catch(e){
+    prompt("以下をコピーしてください",text);
+  }
+}
+
+function restart(){
+  index=0;
+  jobScores={}; Object.keys(jobs).forEach(k=>jobScores[k]=0);
+  traitScores=[0,0,0,0,0];
+  document.getElementById("resultSection").classList.add("hidden");
+  document.getElementById("quizPanel").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function launchConfetti(){
+  const canvas=document.getElementById("confetti");
+  const ctx=canvas.getContext("2d");
+  let w=canvas.width=innerWidth*devicePixelRatio;
+  let h=canvas.height=innerHeight*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  const colors=["#2f80ed","#56ccf2","#27ae60","#f2c94c","#eb5757","#9b51e0"];
+  const pieces=Array.from({length:150},()=>({
+    x:Math.random()*innerWidth,
+    y:-20-Math.random()*innerHeight*.35,
+    r:4+Math.random()*6,
+    vx:-2+Math.random()*4,
+    vy:3+Math.random()*5,
+    rot:Math.random()*Math.PI,
+    vr:-.15+Math.random()*.3,
+    c:colors[Math.floor(Math.random()*colors.length)]
+  }));
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    pieces.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+      ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);
+      ctx.restore();
+    });
+    frame++;
+    if(frame<180) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,innerWidth,innerHeight);
+  }
+  draw();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
